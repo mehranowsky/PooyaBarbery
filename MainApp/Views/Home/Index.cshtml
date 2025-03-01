@@ -1,0 +1,86 @@
+﻿@using ModelLayer.Models
+@model MainApp.Models.ViewModel.AppointmentViewModel;
+
+@{
+    var appointmentDays = ViewBag.AppointmentDays as IEnumerable<AppointmentDay>;
+    var appointmentHours = ViewBag.AppointmentHours as IEnumerable<AppointmentHour>;
+}
+
+<div class="container mt-5" dir="rtl">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>رزرو وقت</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="Home" asp-action="Index">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group mt-3">
+                            <label asp-for="Name" class="control-label mb-2"></label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label asp-for="LastName" class="control-label mb-2"></label>
+                            <input asp-for="LastName" class="form-control" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label asp-for="PhoneNumber" class="control-label mb-2"></label>
+                            <input asp-for="PhoneNumber" class="form-control" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label asp-for="AppointmentDayId" class="control-label mb-2"></label>
+                            <select asp-for="AppointmentDayId" class="form-control" asp-items="ViewBag.AppointmentDayId">
+                                @foreach (var day in appointmentDays)
+                                {
+                                    <option value="@day.Id">@day.Day</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AppointmentDayId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group mt-3">
+                            <label asp-for="AppointmentHourId" class="control-label mb-2"></label>
+                            <select asp-for="AppointmentHourId" id="appointmentHour" class="form-control">
+                                <option value="">Select an hour</option>
+                                @foreach (var hour in appointmentHours)
+                                {
+                                    <option data-day-id="@hour.DayId" value="@hour.Id">@hour.Hour</option>
+                                }
+                            </select>
+                            <span asp-validation-for="AppointmentHourId" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary w-100 mt-5">ارسال</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#appointmentDay').change(function () {
+                var selectedDayId = $(this).val();
+                $('#appointmentHour option').each(function () {
+                    var hourDayId = $(this).data('day-id');
+                    if (hourDayId == selectedDayId || !selectedDayId) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+                $('#appointmentHour').val('');
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+            }

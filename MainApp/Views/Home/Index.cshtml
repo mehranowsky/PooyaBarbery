@@ -14,7 +14,11 @@
                     <h4>رزرو وقت</h4>
                 </div>
                 <div class="card-body">
-                    <form asp-controller="Home" asp-action="Index">
+                    @if (@TempData["success"] != null)
+                    {
+                        <span class="alert alert-success">@TempData["success"]</span>
+                    }                    
+                    <form asp-controller="Home" asp-action="SubmitAppointment">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                         <div class="form-group mt-3">
                             <label asp-for="Name" class="control-label mb-2"></label>
@@ -33,7 +37,8 @@
                         </div>
                         <div class="form-group mt-3">
                             <label asp-for="AppointmentDayId" class="control-label mb-2"></label>
-                            <select asp-for="AppointmentDayId" class="form-control" asp-items="ViewBag.AppointmentDayId">
+                            <select asp-for="AppointmentDayId" class="form-control">
+                                <option value="" selected>انتخاب روز</option>
                                 @foreach (var day in appointmentDays)
                                 {
                                     <option value="@day.Id">@day.Day</option>
@@ -43,14 +48,21 @@
                         </div>
                         <div class="form-group mt-3">
                             <label asp-for="AppointmentHourId" class="control-label mb-2"></label>
-                            <select asp-for="AppointmentHourId" id="appointmentHour" class="form-control">
-                                <option value="">Select an hour</option>
+                            <select asp-for="AppointmentHourId" class="form-control">
+                                <option value="" selected>انتخاب ساعت</option>
                                 @foreach (var hour in appointmentHours)
                                 {
-                                    <option data-day-id="@hour.DayId" value="@hour.Id">@hour.Hour</option>
+                                    if (hour.IsAvailable)
+                                    {
+                                        <option data-day-id="@hour.DayId" value="@hour.Id">@hour.Hour</option>
+                                    }
                                 }
                             </select>
                             <span asp-validation-for="AppointmentHourId" class="text-danger"></span>
+                            @if (@TempData["hourIsNotAvailable"] != null)
+                            {
+                                <span class="alert alert-danger">@TempData["hourIsNotAvailable"]</span>
+                            }                            
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary w-100 mt-5">ارسال</button>
@@ -65,22 +77,28 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('#appointmentDay').change(function () {
-                var selectedDayId = $(this).val();
-                $('#appointmentHour option').each(function () {
-                    var hourDayId = $(this).data('day-id');
-                    if (hourDayId == selectedDayId || !selectedDayId) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-                $('#appointmentHour').val('');
+        var Days = document.getElementById("AppointmentDayId")
+        var selectedDayId = Days.value;
+        var hours = document.querySelectorAll('#AppointmentHourId option');
+        Days.addEventListener('change', ()=>{
+            selectedDayId = Days.value;
+            filterHours();
+        })
+        function filterHours(){
+            hours.forEach((hour) => {
+                var hourId = hour.getAttribute('data-day-id');
+                if (hourId == selectedDayId) {
+                   hour.style.display = 'block'
+                } else {
+                    hour.style.display = 'none';
+                }
             });
-        });
+        }
+
+        filterHours();
+
     </script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-            }
+}

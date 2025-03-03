@@ -1,32 +1,34 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ModelLayer.Context;
 using ModelLayer.Models;
+using System.Threading.Tasks;
 
 namespace ServiceLayer
 {
     public class GenericService<T> : IGenericService<T> where T : BaseEntity
     {
-        private readonly BarberyDbContext _context;
+        protected readonly BarberyDbContext _context;
         private readonly DbSet<T> _table;
         public GenericService(BarberyDbContext context)
         {
             _context = context;
             _table = context.Set<T>();
         }
-        public IEnumerable<T> GetAll()
+        public async Task<IEnumerable<T>> GetAll()
         {
-            return _table.ToList();
+            return await _table.ToListAsync();
         }
 
-        public T GetEntity(int id)
+        public async Task<T> GetEntity(int id)
         {
-            return _table.Find(id);
+            return await _table.FindAsync(id);
         }
-        public bool Add(T entity)
+
+        public async Task<bool> Add(T entity)
         {
             try
             {
-                _table.Add(entity);
+                await _table.FindAsync(entity);
                 return true;
             }
             catch
@@ -34,7 +36,6 @@ namespace ServiceLayer
                 return false;
             }
         }
-
         public bool Update(T entity)
         {
             try
@@ -61,11 +62,11 @@ namespace ServiceLayer
             }
         }
 
-        public bool Delete(int id)
+        public async Task<bool> Delete(int id)
         {
             try
             {
-                var entity = GetEntity(id);
+                var entity = await GetEntity(id);
                 _table.Entry(entity).State = EntityState.Deleted;
                 return true;
             }
@@ -74,13 +75,15 @@ namespace ServiceLayer
                 return false;
             }
         }                       
-        public void Save()
+       
+        public async Task Save()
         {
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
+
         public void Dispose()
         {
-            _context.Dispose();
+            _context.DisposeAsync();
         }
     }
 }

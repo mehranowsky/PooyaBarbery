@@ -8,7 +8,7 @@ namespace MainApp.Utilities
     {
         public MappingProfile()
         {
-            CreateMap<Appointment, AppointmentViewModel>().ReverseMap();
+            CreateMap<AppointmentViewModel, Appointment>().ReverseMap();
             // Add other mappings here
         }
     }

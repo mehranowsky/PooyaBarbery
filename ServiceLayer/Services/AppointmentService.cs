@@ -1,4 +1,5 @@
-﻿using ModelLayer.Context;
+﻿using Microsoft.EntityFrameworkCore;
+using ModelLayer.Context;
 using ModelLayer.Models;
 
 namespace ServiceLayer.Services
@@ -9,6 +10,12 @@ namespace ServiceLayer.Services
         {
             
         }
-        
+
+        public async Task<IEnumerable<Appointment>> GetAllAppointments()
+        {
+            return await _context.Appointments.
+                OrderBy(a=>a.AppointmentDayId)
+                .ThenBy(a=> a.AppointmentHourId).ToListAsync();
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace MainApp.Models.ViewModel
 {
     public class AppointmentViewModel
     {
+        public int Id { get; set; }
         [Display(Name ="نام")]
         [Required(ErrorMessage ="{0} را وارد کنید")]        
         [StringLength(15,MinimumLength =3,ErrorMessage = "{0} باید بین 3 تا 15 حرف باشد")]

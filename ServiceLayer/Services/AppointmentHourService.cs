@@ -13,14 +13,7 @@ namespace ServiceLayer.Services
         public bool IsHourAvailable(int hourId, int dayId)
         {
             var hour = _context.AppointmentHours.FirstOrDefault(h=> h.Id == hourId && h.DayId == dayId);
-            if (hour.IsAvailable)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return hour.IsAvailable;
         }
 
         public bool setAvailable(int hourId, int dayId)

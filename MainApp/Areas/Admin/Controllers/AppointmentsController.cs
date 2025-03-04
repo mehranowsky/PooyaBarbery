@@ -1,13 +1,16 @@
 ﻿using AutoMapper;
 using MainApp.Models.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using ModelLayer.Models;
 using ServiceLayer.Services;
+using System.Threading.Tasks;
 
 namespace MainApp.Area.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize]
     public class AppointmentsController : Controller
     {
         private readonly IAppointmentService _appointment;
@@ -27,8 +30,14 @@ namespace MainApp.Area.Admin.Controllers
         // GET: Appointments
         public async Task<IActionResult> Index()
         {
-            ViewBag.AppointmentHours = await _appointmentHour.GetAll();
-            return View(await _appointment.GetAll());
+            var appointments = await _appointment.GetAllAppointments();
+            var appointmentViewModel = _mapper.Map<IEnumerable<AppointmentViewModel>>(appointments);
+            var appointmentHours = await _appointmentHour.GetAll();
+            var appointmentDays = await _appointmentDay.GetAll();
+
+            ViewBag.AppointmentHours = appointmentHours;
+            ViewBag.AppointmentDays = appointmentDays;
+            return View(appointmentViewModel);
         }
 
         // GET: Appointments/Details/5
@@ -40,48 +49,12 @@ namespace MainApp.Area.Admin.Controllers
             }
 
             var appointment = await _appointment.GetEntity(id.Value);
-            if (appointment == null)
+            var appointmentViewModel = _mapper.Map<PhoneNumberViewModel>(appointment);
+            if (appointmentViewModel == null)
             {
                 return NotFound();
             }
-
-            ViewData["AppointmentDayId"] = new SelectList(await _appointmentDay.GetAll(), "Id", "Day", appointment.AppointmentDayId);
-            ViewData["AppointmentHourId"] = new SelectList(await _appointmentHour.GetAll(), "Id", "Hour", appointment.AppointmentHourId);
-            return View(appointment);
-        }
-
-
-        // GET: Appointments/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var appointment = await _appointment.GetEntity(id.Value);
-            if (appointment == null)
-            {
-                return NotFound();
-            }
-            ViewData["AppointmentDayId"] = new SelectList(await _appointmentDay.GetAll(), "Id", "Day", appointment.AppointmentDayId);
-            ViewData["AppointmentHourId"] = new SelectList(await _appointmentHour.GetAll(), "Id", "Hour", appointment.AppointmentHourId);
-            return View(appointment);
-        }
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,LastName,PhoneNumber,AppointmentDayId,AppointmentHourId")] AppointmentViewModel appointmentViewModel)
-        {
-
-            if (ModelState.IsValid)
-            {
-                var appointment = _mapper.Map<AppointmentViewModel, Appointment>(appointmentViewModel);
-                _appointment.Update(appointment);
-                await _appointment.Save();
-                return RedirectToAction(nameof(Index));
-            }
+            
             return View(appointmentViewModel);
         }
 
@@ -94,12 +67,13 @@ namespace MainApp.Area.Admin.Controllers
             }
 
             var appointment = await _appointment.GetEntity(id.Value);
-            if (appointment == null)
+            var appointmentViewModel = _mapper.Map<PhoneNumberViewModel>(appointment);
+            if (appointmentViewModel == null)
             {
                 return NotFound();
             }
 
-            return View(appointment);
+            return View(appointmentViewModel);
         }
 
         // POST: Appointments/Delete/5
@@ -110,10 +84,9 @@ namespace MainApp.Area.Admin.Controllers
             var appointment = await _appointment.GetEntity(id);
             if (appointment != null)
             {
-                _appointment.Delete(appointment);
-            }
-
-            await _appointment.Save();
+                _appointmentHour.setAvailable(appointment.AppointmentHourId, appointment.AppointmentDayId);
+                await _appointment.Delete(appointment);
+            }            
             return RedirectToAction(nameof(Index));
         }
     }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ModelLayer.Context;
 using ModelLayer.Models;
-using System.Threading.Tasks;
 
 namespace ServiceLayer
 {
@@ -28,7 +27,8 @@ namespace ServiceLayer
         {
             try
             {
-                await _table.FindAsync(entity);
+                await _table.AddAsync(entity);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch
@@ -36,11 +36,12 @@ namespace ServiceLayer
                 return false;
             }
         }
-        public bool Update(T entity)
+        public async Task<bool> Update(T entity)
         {
             try
             {
-                _table.Entry(entity).State = EntityState.Modified;
+                _table.Update(entity);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch
@@ -49,11 +50,12 @@ namespace ServiceLayer
             }
         }
 
-        public bool Delete(T entity)
+        public async Task<bool> Delete(T entity)
         {
             try
             {
-                _table.Entry(entity).State = EntityState.Deleted;
+                _table.Remove(entity);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch
@@ -67,19 +69,15 @@ namespace ServiceLayer
             try
             {
                 var entity = await GetEntity(id);
-                _table.Entry(entity).State = EntityState.Deleted;
+                _table.Remove(entity);
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch
             {
                 return false;
             }
-        }                       
-       
-        public async Task Save()
-        {
-            await _context.SaveChangesAsync();
-        }
+        }                             
 
         public void Dispose()
         {

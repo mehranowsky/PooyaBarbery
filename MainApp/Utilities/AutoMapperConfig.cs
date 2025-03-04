@@ -8,8 +8,8 @@ namespace MainApp.Utilities
     {
         public MappingProfile()
         {
-            CreateMap<AppointmentViewModel, Appointment>().ReverseMap();
-            // Add other mappings here
+            CreateMap<Appointment, AppointmentViewModel>().ReverseMap();
+            CreateMap<Appointment, PhoneNumberViewModel>().ReverseMap();            
         }
     }
 }

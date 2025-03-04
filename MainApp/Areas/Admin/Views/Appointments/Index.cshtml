@@ -1,17 +1,15 @@
 ﻿@using ModelLayer.Models
-@model IEnumerable<ModelLayer.Models.Appointment>
+@model IEnumerable<MainApp.Models.ViewModel.AppointmentViewModel>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "فهرست";
     var appointmentHour = ViewBag.AppointmentHours as IEnumerable<AppointmentHour>;
+    var appointmentDay = ViewBag.AppointmentDays as IEnumerable<AppointmentDay>;
 }
 
-<h1>Index</h1>
+<h1>فهرست</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
+<table class="table table-bordered">
     <thead>
         <tr>
             <th>
@@ -21,15 +19,11 @@
                 @Html.DisplayNameFor(model => model.LastName)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.PhoneNumber)
-            </th>
-            <th>
                 @Html.DisplayNameFor(model => model.AppointmentHourId)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.AppointmentDay)
-            </th>
-            <th></th>
+                @Html.DisplayNameFor(model => model.AppointmentDayId)
+            </th>            
         </tr>
     </thead>
     <tbody>
@@ -42,18 +36,14 @@
                 @Html.DisplayFor(modelItem => item.LastName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.PhoneNumber)
+                @(appointmentHour.FirstOrDefault(h => h.Id == item.AppointmentHourId)?.Hour ?? "N/A")
             </td>
             <td>
-                @appointmentHour.FirstOrDefault(h => h.Id == item.AppointmentHourId).Hour
+                @(appointmentDay.FirstOrDefault(d => d.Id == item.AppointmentDayId)?.Day ?? "N/A")
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AppointmentDay.Day)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            <td>                 
+                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">شماره تماس</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">حذف</a>
             </td>
         </tr>
 }

@@ -4,6 +4,6 @@ namespace ServiceLayer.Services
 {
     public interface IAdminService : IGenericService<Admin>
     {
-        Task<bool> IsAdmin(string username, string password);
+        Task<Admin> GetAdmin(string username, string password);
     }
 }
